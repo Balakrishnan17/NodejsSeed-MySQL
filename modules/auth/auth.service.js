@@ -1,8 +1,8 @@
 const seedModal = require('./auth.model');
 
-const service ={
+const service = {
 
-    saveUser: async(data)=>{
+    saveUser: async (data) => {
         try {
             const saveSeed = await seedModal.create(data)
             return saveSeed
@@ -11,9 +11,13 @@ const service ={
         }
     },
 
-    getUserByEmail: async(email)=>{
+    getUserByEmail: async (email) => {
         try {
-            const saveSeed = await seedModal.find({email:email});
+            const saveSeed = await seedModal.findAll({
+                where: {
+                    email: email
+                }
+            });
             return saveSeed
         } catch (error) {
             throw error

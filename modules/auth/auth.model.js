@@ -1,47 +1,73 @@
-const mongoose = require('mongoose');
+const seq = require('../../config/database');
+const Sequelize = require('sequelize');
 
-const seedSchema = mongoose.Schema({
-    first_name:{
-        type:String,
-        require:true
+let schema = seq.define('user', {
+    create_date: {
+        type: Sequelize.DATE,
+        defaultValue: null,
+
     },
-    last_name:{
-        type:String,
-        default:""
+    update_date: {
+        type: Sequelize.DATE,
+        defaultValue: null,
     },
-    email:{
-        type:String,
-        unique:true,
-        require:true
+    first_name: {
+        type: Sequelize.STRING,
+        allowNull: false,
+        trim: true
     },
-    phone_number:{
-        type:String,
-        unique:true,
-        require:true
+    last_name: {
+        type: Sequelize.STRING,
+        defaultValue: "",
+        trim: true
     },
-    profile_image:{
-        type:String
+    email: {
+        type: Sequelize.STRING,
+        defaultValue: "",
+        trim: true,
+        unique: true,
+        validate: {
+            isEmail: true
+        }
     },
-    password:{
-        type:String,
-        require:true
+    phone_number: {
+        type: Sequelize.STRING,
+        trim: true,
+        allowNull: false,
+        unique: true
     },
-    date_of_birth:{
-        type:Date,
-        require:true
+    profile_image: {
+        type: Sequelize.STRING,
+        defaultValue: "",
+    },
+    password: {
+        type: Sequelize.STRING,
+        trim: true,
+        allowNull: false,
+    },
+    date_of_birth: {
+        type: Sequelize.DATE,
+        allowNull: false,
     },
     status: {
-        type: String,
-        enum: ['active', 'in_active'],
-        default: "in_active"
+        type: Sequelize.ENUM(['active', 'in_active']),
+        defaultValue: "in_active"
     },
-    user_type:{
-        type: String,
-        enum: ['guest', 'admin'],
-        default: "guest"
+    user_type: {
+        type: Sequelize.ENUM(['guest', 'admin']),
+        defaultValue: "guest"
     }
-},{collection:'user',timestamps:true})
+}, {
+    underscored: true,
+    timestamps: false,
+    freezeTableName: true,
+});
 
-const seedModal = mongoose.model('user',seedSchema);
+schema.sync({
+    alter: false
+}).then((a) => {
+    console.log(a, 'user table created')
+}).finally(() => {
 
-module.exports = seedModal
+})
+module.exports = schema;

@@ -1,16 +1,25 @@
-const mongoose = require('mongoose');
 const settings = require('../settings');
-const databaseCre = require("./" + settings.environment)
+const databaseCre = require("./" + settings.environment).DATABASE;
+const Sequelize = require("sequelize");
+const mysql = require('mysql2');
 
-const mongooseConnect = {
-    connectDb: async () => {
-        try {
-            await mongoose.connect("mongodb://" + databaseCre.DATABASE.ip + "/seed", { useUnifiedTopology: true,useNewUrlParser: true,useCreateIndex: true });
-            //console.log('Mongoose Connected Successfully');
-        } catch (error) {
-            console.log(error);
-        }
+const path = `mysql://${databaseCre.USER}:${databaseCre.PASSWORD}@${databaseCre.HOST}:${databaseCre.PORT}/${databaseCre.DB}`;
+
+const sequelize = new Sequelize(path, {
+    operatorsAliases: false,
+    pool: {
+        max: 5,
+        min: 0,
+        acquire: 30000,
+        idle: 10000
     }
-}
+});
+sequelize.authenticate().then(() => {
+    console.log('Connection established successfully.');
+}).catch(err => {
+    console.error('Unable to connect to the database:', err);
+}).finally(() => {
+    //   sequelize.close();
+});
 
-module.exports = mongooseConnect
+module.exports = sequelize;
