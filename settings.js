@@ -1,4 +1,4 @@
 module.exports = {
     environment: "local",
-    port:5200
+    port: 5200
 }
