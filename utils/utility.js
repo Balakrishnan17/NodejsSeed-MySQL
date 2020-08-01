@@ -18,10 +18,11 @@ const responce = {
     },
 
     error(res, data, status_code = 400) {
-        res.status(400).send({
-            status: 400,
+        const msg = data.details && data.details.message ? data.details.message : (data.message ? data.message : data);
+        res.status(status_code).send({
+            status: status_code,
             message: 'Error',
-            data: data || []
+            data: msg || "Something went wrong!"
         })
     },
 

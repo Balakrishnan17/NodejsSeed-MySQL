@@ -18,7 +18,7 @@ const service = {
                     email: email
                 }
             });
-            return saveSeed
+            return saveSeed && !(saveSeed.length > 0)
         } catch (error) {
             throw error
         }

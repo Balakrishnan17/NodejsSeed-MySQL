@@ -1,5 +1,6 @@
 const seq = require('../../config/database');
 const Sequelize = require('sequelize');
+const UserInfo = require('./userInfo.model');
 
 let schema = seq.define('user', {
     create_date: {
@@ -56,7 +57,21 @@ let schema = seq.define('user', {
     user_type: {
         type: Sequelize.ENUM(['guest', 'admin']),
         defaultValue: "guest"
-    }
+    },
+    user_info_id: {
+        type: Sequelize.INTEGER,
+     
+        references: {
+          // This is a reference to another model
+          model: UserInfo,
+     
+          // This is the column name of the referenced model
+          key: 'UserInfo',
+     
+          // This declares when to check the foreign key constraint. PostgreSQL only.
+          deferrable: Sequelize.Deferrable.INITIALLY_IMMEDIATE
+        }
+      }
 }, {
     underscored: true,
     timestamps: false,

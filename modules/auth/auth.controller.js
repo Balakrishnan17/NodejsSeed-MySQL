@@ -1,50 +1,47 @@
-const service = require('./auth.service')
-const moment = require('moment-timezone')
-const utility = require('../../utils/utility')
+const moment = require('moment-timezone');
+const Joi = require('joi');
 
+const service = require('./auth.service');
+const utility = require('../../utils/utility');
+
+const JoiSchema = require('../joischema');
+const joiSchema = new JoiSchema();
 module.exports = {
 
     getUser: async (req, res) => {
         try {
+            const bodydata = req.body;
+           
+            const value = Joi.attempt(bodydata,joiSchema.loginSchema());
 
-            const email = req.params.username;
-            const password = req.params.password;
-            if (!email) {
-                utility.error(res, "Invalid Email");
-            }
+            const userData = await service.getUserByEmail(value.username);
 
-            if (!password) {
-                utility.error(res, "Invalid Password");
-            }
-
-            const userData = await service.getUserByEmail(email);
-
-            if (userData && !(userData.length > 0)) {
+            if (userData) {
                 utility.error(res, "User does not excist, please check the username.");
                 return;
             }
 
-            const checkPassword = await utility.comparePassword(password, userData[0].password);
+            const checkPassword = await utility.comparePassword(value.password, userData.password);
             if (!checkPassword) {
                 utility.error(res, "Please check the password.");
                 return;
             }
 
-            if (userData[0].status != "active") {
+            if (userData.status != "active") {
                 utility.error(res, "Please activate your account.");
                 return;
             }
 
 
             let data = {
-                _id: userData[0]._id,
-                first_name: userData[0].first_name,
-                last_name: userData[0].last_name,
-                email: userData[0].email,
-                phone_number: userData[0].phone_number,
-                date_of_birth: moment(userData[0].date_of_birth).format("DD-MM-YYYY"),
-                status: userData[0].status,
-                user_type: userData[0].user_type
+                _id: userData._id,
+                first_name: userData.first_name,
+                last_name: userData.last_name,
+                email: userData.email,
+                phone_number: userData.phone_number,
+                date_of_birth: moment(userData.date_of_birth).format("DD-MM-YYYY"),
+                status: userData.status,
+                user_type: userData.user_type
             }
 
             const token = utility.generateToken(data);
@@ -61,13 +58,15 @@ module.exports = {
     createUser: async (req, res) => {
         try {
             const userData = req.body;
-            userData.date_of_birth = moment(userData.date_of_birth, "DD-MM-YYYY");
-            userData.password = await utility.encryptPassword(userData.password);
-            const save = await service.saveUser(userData);
+            const value = Joi.attempt(userData,joiSchema.singInSchema());
+
+            value.date_of_birth = moment(value.date_of_birth, "DD-MM-YYYY");
+            value.password = await utility.encryptPassword(value.password);
+            const save = await service.saveUser(value);
             utility.sucess(res, "")
         } catch (error) {
             console.log("Create User Error");
-            console.error(error);
+            console.error(error.message);
             utility.error(res, error)
         }
     },
